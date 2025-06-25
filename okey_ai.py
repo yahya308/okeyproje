@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 from collections import defaultdict, Counter
 import random
 from typing import List, Dict, Tuple, Optional
