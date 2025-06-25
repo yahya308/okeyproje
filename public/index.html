@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>101 Okey AI Yardımcı Bot</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .panel h2 {
+            color: #4a5568;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+
+        .okey-indicator {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .okey-indicator h3 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .indicator-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .indicator-btn {
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .indicator-btn:hover {
+            border-color: #4299e1;
+            background: #ebf8ff;
+        }
+
+        .indicator-btn.selected {
+            border-color: #3182ce;
+            background: #3182ce;
+            color: white;
+        }
+
+        .tiles-section {
+            margin-bottom: 20px;
+        }
+
+        .tiles-section h3 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .color-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .color-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            min-width: 80px;
+        }
+
+        .color-btn.active {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .color-btn.red { background: #fed7d7; color: #c53030; }
+        .color-btn.yellow { background: #fefcbf; color: #b7791f; }
+        .color-btn.blue { background: #bee3f8; color: #2b6cb0; }
+        .color-btn.black { background: #e2e8f0; color: #2d3748; }
+
+        .number-buttons {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .number-btn {
+            padding: 12px 8px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .number-btn:hover {
+            border-color: #4299e1;
+            background: #ebf8ff;
+        }
+
+        .fake-okey-btn {
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .fake-okey-btn:hover {
+            border-color: #4299e1;
+            background: #ebf8ff;
+        }
+
+        .selected-tiles {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 15px;
+            min-height: 100px;
+        }
+
+        .selected-tiles h4 {
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+
+        .tile-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tile-item {
+            padding: 8px 12px;
+            background: #4299e1;
+            color: white;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .tile-item .remove {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .discarded-tiles {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 15px;
+            min-height: 100px;
+        }
+
+        .discarded-tiles h4 {
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+
+        .quick-add-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .quick-add-btn {
+            padding: 8px 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .quick-add-btn:hover {
+            border-color: #4299e1;
+            background: #ebf8ff;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .action-btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+
+        .action-btn.analyze {
+            background: #48bb78;
+            color: white;
+        }
+
+        .action-btn.suggest {
+            background: #4299e1;
+            color: white;
+        }
+
+        .action-btn.simulate {
+            background: #ed8936;
+            color: white;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        }
+
+        .action-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-top: 30px;
+        }
+
+        .results h2 {
+            color: #4a5568;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+
+        .result-section {
+            margin-bottom: 25px;
+        }
+
+        .result-section h3 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .result-content {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 15px;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #4a5568;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #fed7d7;
+            border: 2px solid #f56565;
+            border-radius: 10px;
+            padding: 15px;
+            color: #c53030;
+            margin-top: 15px;
+        }
+
+        .success {
+            background: #c6f6d5;
+            border: 2px solid #48bb78;
+            border-radius: 10px;
+            padding: 15px;
+            color: #2f855a;
+            margin-top: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .number-buttons {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎮 101 Okey AI Yardımcı Bot</h1>
+            <p>Yapay zeka destekli okey strateji asistanı</p>
+        </div>
+
+        <div class="main-content">
+            <!-- Sol Panel - Taş Seçimi -->
+            <div class="panel">
+                <h2>🎯 Taş Seçimi</h2>
+                
+                <!-- Okey Gösterge Seçimi -->
+                <div class="okey-indicator">
+                    <h3>🔍 Okey Gösterge Taşı</h3>
+                    <div class="indicator-grid" id="indicatorGrid">
+                        <!-- Gösterge butonları JavaScript ile oluşturulacak -->
+                    </div>
+                </div>
+
+                <!-- Taş Seçimi -->
+                <div class="tiles-section">
+                    <h3>🃏 Taşlarınızı Seçin</h3>
+                    
+                    <!-- Renk Seçimi -->
+                    <div class="color-buttons">
+                        <button class="color-btn red active" data-color="kirmizi">🔴 Kırmızı</button>
+                        <button class="color-btn yellow" data-color="sari">🟡 Sarı</button>
+                        <button class="color-btn blue" data-color="mavi">🔵 Mavi</button>
+                        <button class="color-btn black" data-color="siyah">⚫ Siyah</button>
+                    </div>
+
+                    <!-- Sayı Butonları -->
+                    <div class="number-buttons" id="numberButtons">
+                        <!-- Sayı butonları JavaScript ile oluşturulacak -->
+                    </div>
+
+                    <!-- Sahte Okey Butonu -->
+                    <button class="fake-okey-btn" id="fakeOkeyBtn">🎭 Sahte Okey</button>
+                </div>
+
+                <!-- Seçilen Taşlar -->
+                <div class="selected-tiles">
+                    <h4>📋 Seçilen Taşlar (<span id="selectedCount">0</span>)</h4>
+                    <div class="tile-list" id="selectedTilesList">
+                        <!-- Seçilen taşlar burada görünecek -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sağ Panel - Atılan Taşlar ve Analiz -->
+            <div class="panel">
+                <h2>📊 Analiz ve Öneriler</h2>
+                
+                <!-- Atılan Taşlar -->
+                <div class="discarded-tiles">
+                    <h4>🗑️ Atılan Taşlar (<span id="discardedCount">0</span>)</h4>
+                    
+                    <!-- Hızlı Ekleme Butonları -->
+                    <div class="quick-add-buttons">
+                        <button class="quick-add-btn" onclick="addCommonTiles()">📈 Yaygın Taşlar (1'ler, 13'ler)</button>
+                        <button class="quick-add-btn" onclick="clearDiscarded()">🗑️ Temizle</button>
+                    </div>
+                    
+                    <div class="tile-list" id="discardedTilesList">
+                        <!-- Atılan taşlar burada görünecek -->
+                    </div>
+                </div>
+
+                <!-- Aksiyon Butonları -->
+                <div class="action-buttons">
+                    <button class="action-btn analyze" onclick="analyzeHand()">🔍 Analiz Et</button>
+                    <button class="action-btn suggest" onclick="suggestTile()">💡 Taş Öner</button>
+                    <button class="action-btn simulate" onclick="runSimulation()">🎲 Simülasyon</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sonuçlar -->
+        <div class="results" id="results" style="display: none;">
+            <h2>📈 Analiz Sonuçları</h2>
+            <div id="resultsContent">
+                <!-- Sonuçlar burada görünecek -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global değişkenler
+        let selectedTiles = [];
+        let discardedTiles = [];
+        let selectedColor = 'kirmizi';
+        let selectedIndicator = null;
+        let backendUrl = 'https://your-backend-url.onrender.com'; // Backend URL'inizi buraya yazın
+
+        // Sayılar ve renkler
+        const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+        const colors = ['kirmizi', 'sari', 'mavi', 'siyah'];
+
+        // Sayı butonlarını oluştur
+        function createNumberButtons() {
+            const numberButtons = document.getElementById('numberButtons');
+            numberButtons.innerHTML = '';
+            
+            numbers.forEach(num => {
+                const btn = document.createElement('button');
+                btn.className = 'number-btn';
+                btn.textContent = num;
+                btn.onclick = () => addTile(selectedColor, num);
+                numberButtons.appendChild(btn);
+            });
+        }
+
+        // Gösterge butonlarını oluştur
+        function createIndicatorButtons() {
+            const indicatorGrid = document.getElementById('indicatorGrid');
+            indicatorGrid.innerHTML = '';
+            
+            colors.forEach(color => {
+                numbers.forEach(num => {
+                    const btn = document.createElement('button');
+                    btn.className = 'indicator-btn';
+                    btn.textContent = `${getColorEmoji(color)} ${num}`;
+                    btn.onclick = () => selectIndicator(color, num);
+                    indicatorGrid.appendChild(btn);
+                });
+            });
+        }
+
+        // Renk emoji'si al
+        function getColorEmoji(color) {
+            const emojis = {
+                'kirmizi': '🔴',
+                'sari': '🟡',
+                'mavi': '🔵',
+                'siyah': '⚫'
+            };
+            return emojis[color] || '⚪';
+        }
+
+        // Renk seçimi
+        document.querySelectorAll('.color-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedColor = btn.dataset.color;
+            });
+        });
+
+        // Gösterge seçimi
+        function selectIndicator(color, number) {
+            document.querySelectorAll('.indicator-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+            selectedIndicator = { color, number };
+        }
+
+        // Taş ekleme
+        function addTile(color, number) {
+            const tile = { color, number };
+            selectedTiles.push(tile);
+            updateSelectedTilesDisplay();
+        }
+
+        // Sahte okey ekleme
+        document.getElementById('fakeOkeyBtn').onclick = () => {
+            selectedTiles.push({ color: 'sahte_okey', number: 0 });
+            updateSelectedTilesDisplay();
+        };
+
+        // Seçilen taşları güncelle
+        function updateSelectedTilesDisplay() {
+            const list = document.getElementById('selectedTilesList');
+            const count = document.getElementById('selectedCount');
+            
+            list.innerHTML = '';
+            count.textContent = selectedTiles.length;
+            
+            selectedTiles.forEach((tile, index) => {
+                const item = document.createElement('div');
+                item.className = 'tile-item';
+                
+                if (tile.color === 'sahte_okey') {
+                    item.innerHTML = `
+                        🎭 Sahte Okey
+                        <button class="remove" onclick="removeSelectedTile(${index})">×</button>
+                    `;
+                } else {
+                    item.innerHTML = `
+                        ${getColorEmoji(tile.color)} ${tile.number}
+                        <button class="remove" onclick="removeSelectedTile(${index})">×</button>
+                    `;
+                }
+                
+                list.appendChild(item);
+            });
+        }
+
+        // Seçilen taşı kaldır
+        function removeSelectedTile(index) {
+            selectedTiles.splice(index, 1);
+            updateSelectedTilesDisplay();
+        }
+
+        // Atılan taş ekleme (sağ tık veya çift tık)
+        function setupTileClickHandlers() {
+            document.querySelectorAll('.number-btn, .fake-okey-btn').forEach(btn => {
+                btn.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    addToDiscarded(btn);
+                });
+                
+                btn.addEventListener('dblclick', () => {
+                    addToDiscarded(btn);
+                });
+            });
+        }
+
+        // Atılan taşlara ekle
+        function addToDiscarded(btn) {
+            let tile;
+            
+            if (btn.id === 'fakeOkeyBtn') {
+                tile = { color: 'sahte_okey', number: 0 };
+            } else {
+                tile = { color: selectedColor, number: parseInt(btn.textContent) };
+            }
+            
+            discardedTiles.push(tile);
+            updateDiscardedTilesDisplay();
+        }
+
+        // Yaygın taşları ekle
+        function addCommonTiles() {
+            const commonTiles = [
+                { color: 'kirmizi', number: 1 }, { color: 'sari', number: 1 },
+                { color: 'mavi', number: 1 }, { color: 'siyah', number: 1 },
+                { color: 'kirmizi', number: 13 }, { color: 'sari', number: 13 },
+                { color: 'mavi', number: 13 }, { color: 'siyah', number: 13 }
+            ];
+            
+            commonTiles.forEach(tile => {
+                discardedTiles.push(tile);
+            });
+            updateDiscardedTilesDisplay();
+        }
+
+        // Atılan taşları temizle
+        function clearDiscarded() {
+            discardedTiles = [];
+            updateDiscardedTilesDisplay();
+        }
+
+        // Atılan taşları güncelle
+        function updateDiscardedTilesDisplay() {
+            const list = document.getElementById('discardedTilesList');
+            const count = document.getElementById('discardedCount');
+            
+            list.innerHTML = '';
+            count.textContent = discardedTiles.length;
+            
+            discardedTiles.forEach((tile, index) => {
+                const item = document.createElement('div');
+                item.className = 'tile-item';
+                
+                if (tile.color === 'sahte_okey') {
+                    item.innerHTML = `
+                        🎭 Sahte Okey
+                        <button class="remove" onclick="removeDiscardedTile(${index})">×</button>
+                    `;
+                } else {
+                    item.innerHTML = `
+                        ${getColorEmoji(tile.color)} ${tile.number}
+                        <button class="remove" onclick="removeDiscardedTile(${index})">×</button>
+                    `;
+                }
+                
+                list.appendChild(item);
+            });
+        }
+
+        // Atılan taşı kaldır
+        function removeDiscardedTile(index) {
+            discardedTiles.splice(index, 1);
+            updateDiscardedTilesDisplay();
+        }
+
+        // API çağrısı yap
+        async function makeApiCall(endpoint, data) {
+            try {
+                const response = await fetch(`${backendUrl}${endpoint}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('API Error:', error);
+                throw error;
+            }
+        }
+
+        // El analizi
+        async function analyzeHand() {
+            if (!selectedIndicator) {
+                showError('Lütfen önce okey gösterge taşını seçin!');
+                return;
+            }
+            
+            if (selectedTiles.length === 0) {
+                showError('Lütfen en az bir taş seçin!');
+                return;
+            }
+            
+            showLoading('El analiz ediliyor...');
+            
+            try {
+                const data = {
+                    tiles: selectedTiles,
+                    indicator: selectedIndicator,
+                    discarded_tiles: discardedTiles
+                };
+                
+                const result = await makeApiCall('/api/analyze', data);
+                showResults('El Analizi', result);
+            } catch (error) {
+                showError('Analiz sırasında hata oluştu: ' + error.message);
+            }
+        }
+
+        // Taş önerisi
+        async function suggestTile() {
+            if (!selectedIndicator) {
+                showError('Lütfen önce okey gösterge taşını seçin!');
+                return;
+            }
+            
+            if (selectedTiles.length === 0) {
+                showError('Lütfen en az bir taş seçin!');
+                return;
+            }
+            
+            showLoading('En iyi taş önerisi hesaplanıyor...');
+            
+            try {
+                const data = {
+                    tiles: selectedTiles,
+                    indicator: selectedIndicator,
+                    discarded_tiles: discardedTiles
+                };
+                
+                const result = await makeApiCall('/api/suggest_tile', data);
+                showResults('Taş Önerisi', result);
+            } catch (error) {
+                showError('Taş önerisi sırasında hata oluştu: ' + error.message);
+            }
+        }
+
+        // Simülasyon
+        async function runSimulation() {
+            if (!selectedIndicator) {
+                showError('Lütfen önce okey gösterge taşını seçin!');
+                return;
+            }
+            
+            if (selectedTiles.length === 0) {
+                showError('Lütfen en az bir taş seçin!');
+                return;
+            }
+            
+            showLoading('Monte Carlo simülasyonu çalıştırılıyor...');
+            
+            try {
+                const data = {
+                    tiles: selectedTiles,
+                    indicator: selectedIndicator,
+                    discarded_tiles: discardedTiles
+                };
+                
+                const result = await makeApiCall('/api/simulate', data);
+                showResults('Simülasyon Sonuçları', result);
+            } catch (error) {
+                showError('Simülasyon sırasında hata oluştu: ' + error.message);
+            }
+        }
+
+        // Yükleme göster
+        function showLoading(message) {
+            const results = document.getElementById('results');
+            const content = document.getElementById('resultsContent');
+            
+            results.style.display = 'block';
+            content.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        // Sonuçları göster
+        function showResults(title, data) {
+            const results = document.getElementById('results');
+            const content = document.getElementById('resultsContent');
+            
+            let html = `<div class="result-section">
+                <h3>${title}</h3>
+                <div class="result-content">`;
+            
+            if (typeof data === 'object') {
+                html += JSON.stringify(data, null, 2);
+            } else {
+                html += data;
+            }
+            
+            html += `</div></div>`;
+            
+            content.innerHTML = html;
+            results.style.display = 'block';
+        }
+
+        // Hata göster
+        function showError(message) {
+            const results = document.getElementById('results');
+            const content = document.getElementById('resultsContent');
+            
+            results.style.display = 'block';
+            content.innerHTML = `
+                <div class="error">
+                    <strong>Hata:</strong> ${message}
+                </div>
+            `;
+        }
+
+        // Sayfa yüklendiğinde
+        document.addEventListener('DOMContentLoaded', () => {
+            createNumberButtons();
+            createIndicatorButtons();
+            setupTileClickHandlers();
+        });
+    </script>
+</body>
+</html> 

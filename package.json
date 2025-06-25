@@ -1,0 +1,13 @@
+{
+  "name": "okey-ai-frontend",
+  "version": "1.0.0",
+  "description": "101 Okey AI Assistant Frontend",
+  "main": "index.js",
+  "scripts": {
+    "build": "echo 'Build completed'",
+    "dev": "echo 'Development server'"
+  },
+  "keywords": ["okey", "ai", "game", "assistant"],
+  "author": "Your Name",
+  "license": "MIT"
+} 
