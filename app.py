@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, send_from_directory, request, jsonify
 from flask_cors import CORS
 import json
 import okey_ai
@@ -12,7 +12,7 @@ ai_engine = okey_ai.OkeyAI()
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return send_from_directory('public', 'index.html')
 
 @app.route('/api/analyze', methods=['POST'])
 def analyze():
