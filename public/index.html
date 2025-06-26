@@ -375,6 +375,115 @@
             margin-top: 15px;
         }
 
+        /* Analiz sonuçları için stiller */
+        .analysis-section {
+            margin-bottom: 25px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #4299e1;
+        }
+
+        .analysis-section h4 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .pers-container {
+            margin-bottom: 15px;
+        }
+
+        .per-item {
+            background: white;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .tile-display {
+            display: inline-block;
+            padding: 4px 8px;
+            margin: 2px;
+            background: #4299e1;
+            color: white;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .tile-display.large {
+            font-size: 1.2rem;
+            padding: 8px 12px;
+        }
+
+        .score-info {
+            background: #ebf8ff;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .score-info p {
+            margin: 5px 0;
+            color: #2b6cb0;
+        }
+
+        .unused-tiles {
+            background: #fed7d7;
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        .recommendations-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .recommendations-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .recommendations-list li:last-child {
+            border-bottom: none;
+        }
+
+        .risk-container, .values-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .risk-item, .value-item {
+            background: white;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .risk-level {
+            color: #e53e3e;
+            font-weight: bold;
+        }
+
+        .value-score {
+            color: #38a169;
+            font-weight: bold;
+        }
+
+        .suggested-tile {
+            text-align: center;
+            background: #c6f6d5;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #48bb78;
+        }
+
         @media (max-width: 768px) {
             .main-content {
                 grid-template-columns: 1fr;
@@ -812,7 +921,7 @@
                 <div class="result-content">`;
             
             if (typeof data === 'object') {
-                html += JSON.stringify(data, null, 2);
+                html += formatAnalysisResults(data);
             } else {
                 html += data;
             }
@@ -821,6 +930,115 @@
             
             content.innerHTML = html;
             results.style.display = 'block';
+        }
+
+        // Analiz sonuçlarını formatla
+        function formatAnalysisResults(data) {
+            let html = '';
+            
+            // El Analizi
+            if (data.best_arrangement) {
+                html += '<div class="analysis-section">';
+                html += '<h4>🎯 En İyi El Dizilimi</h4>';
+                
+                if (data.best_arrangement.pers && data.best_arrangement.pers.length > 0) {
+                    html += '<div class="pers-container">';
+                    data.best_arrangement.pers.forEach((per, index) => {
+                        html += `<div class="per-item">
+                            <strong>Per ${index + 1}:</strong> `;
+                        per.forEach(tile => {
+                            html += `<span class="tile-display">${getColorEmoji(tile.color)} ${tile.number}</span>`;
+                        });
+                        html += '</div>';
+                    });
+                    html += '</div>';
+                } else {
+                    html += '<p>❌ Geçerli per bulunamadı</p>';
+                }
+                
+                html += `<div class="score-info">
+                    <p><strong>Toplam Puan:</strong> ${data.best_arrangement.score}</p>
+                    <p><strong>Kullanılan Taş:</strong> ${data.best_arrangement.total_tiles_used}</p>
+                </div>`;
+                
+                if (data.best_arrangement.unused_tiles && data.best_arrangement.unused_tiles.length > 0) {
+                    html += '<div class="unused-tiles">';
+                    html += '<p><strong>Kullanılmayan Taşlar:</strong></p>';
+                    data.best_arrangement.unused_tiles.forEach(tile => {
+                        html += `<span class="tile-display">${getColorEmoji(tile.color)} ${tile.number}</span>`;
+                    });
+                    html += '</div>';
+                }
+                
+                html += '</div>';
+            }
+            
+            // Öneriler
+            if (data.recommendations && data.recommendations.length > 0) {
+                html += '<div class="analysis-section">';
+                html += '<h4>💡 AI Önerileri</h4>';
+                html += '<ul class="recommendations-list">';
+                data.recommendations.forEach(rec => {
+                    html += `<li>${rec}</li>`;
+                });
+                html += '</ul>';
+                html += '</div>';
+            }
+            
+            // Risk Analizi
+            if (data.risk_analysis && Object.keys(data.risk_analysis).length > 0) {
+                html += '<div class="analysis-section">';
+                html += '<h4>⚠️ Risk Analizi</h4>';
+                html += '<div class="risk-container">';
+                Object.entries(data.risk_analysis).forEach(([tile, risk]) => {
+                    const [color, number] = tile.split('_');
+                    html += `<div class="risk-item">
+                        <span class="tile-display">${getColorEmoji(color)} ${number}</span>
+                        <span class="risk-level">Risk: ${risk}/10</span>
+                    </div>`;
+                });
+                html += '</div>';
+                html += '</div>';
+            }
+            
+            // Taş Değerleri
+            if (data.tile_values && Object.keys(data.tile_values).length > 0) {
+                html += '<div class="analysis-section">';
+                html += '<h4>💰 Taş Değerleri</h4>';
+                html += '<div class="values-container">';
+                Object.entries(data.tile_values).forEach(([tile, value]) => {
+                    const [color, number] = tile.split('_');
+                    html += `<div class="value-item">
+                        <span class="tile-display">${getColorEmoji(color)} ${number}</span>
+                        <span class="value-score">Değer: ${value}</span>
+                    </div>`;
+                });
+                html += '</div>';
+                html += '</div>';
+            }
+            
+            // Simülasyon Sonuçları
+            if (data.simulation_results) {
+                html += '<div class="analysis-section">';
+                html += '<h4>🎲 Simülasyon Sonuçları</h4>';
+                html += `<p><strong>Kazanma Oranı:</strong> ${(data.simulation_results.win_rate * 100).toFixed(1)}%</p>`;
+                html += `<p><strong>Ortalama Puan:</strong> ${data.simulation_results.average_score.toFixed(1)}</p>`;
+                html += `<p><strong>En İyi Senaryo:</strong> ${data.simulation_results.best_scenario}</p>`;
+                html += '</div>';
+            }
+            
+            // Taş Önerisi
+            if (data.suggested_tile) {
+                html += '<div class="analysis-section">';
+                html += '<h4>🎯 Önerilen Taş</h4>';
+                html += `<div class="suggested-tile">
+                    <span class="tile-display large">${getColorEmoji(data.suggested_tile.color)} ${data.suggested_tile.number}</span>
+                    <p><strong>Neden:</strong> ${data.reason || 'En düşük riskli taş'}</p>
+                </div>`;
+                html += '</div>';
+            }
+            
+            return html;
         }
 
         // Hata göster
