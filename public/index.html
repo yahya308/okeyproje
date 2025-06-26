@@ -484,6 +484,31 @@
             border: 2px solid #48bb78;
         }
 
+        .best-moves {
+            margin-top: 15px;
+        }
+
+        .move-item {
+            background: white;
+            padding: 8px 12px;
+            margin-bottom: 5px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        pre {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            overflow-x: auto;
+            font-size: 0.8rem;
+            line-height: 1.4;
+        }
+
         @media (max-width: 768px) {
             .main-content {
                 grid-template-columns: 1fr;
@@ -862,9 +887,14 @@
                     discarded_tiles: discardedTiles
                 };
                 
+                console.log('Taş önerisi için gönderilen data:', data);
+                
                 const result = await makeApiCall('/api/suggest_tile', data);
+                console.log('Taş önerisi sonucu:', result);
+                
                 showResults('Taş Önerisi', result);
             } catch (error) {
+                console.error('Taş önerisi hatası:', error);
                 showError('Taş önerisi sırasında hata oluştu: ' + error.message);
             }
         }
@@ -890,9 +920,14 @@
                     discarded_tiles: discardedTiles
                 };
                 
+                console.log('Simülasyon için gönderilen data:', data);
+                
                 const result = await makeApiCall('/api/simulate', data);
+                console.log('Simülasyon sonucu:', result);
+                
                 showResults('Simülasyon Sonuçları', result);
             } catch (error) {
+                console.error('Simülasyon hatası:', error);
                 showError('Simülasyon sırasında hata oluştu: ' + error.message);
             }
         }
@@ -935,6 +970,59 @@
         // Analiz sonuçlarını formatla
         function formatAnalysisResults(data) {
             let html = '';
+            
+            console.log('Formatlanacak data:', data);
+            
+            // Taş önerisi formatı
+            if (data.suggestion || data.tile) {
+                html += '<div class="analysis-section">';
+                html += '<h4>🎯 Önerilen Taş</h4>';
+                
+                if (data.tile) {
+                    html += `<div class="suggested-tile">
+                        <span class="tile-display large">${getColorEmoji(data.tile.color)} ${data.tile.number}</span>
+                        <p><strong>Öneri:</strong> ${data.suggestion || 'Bu taşı atın'}</p>
+                        <p><strong>Neden:</strong> ${data.reason || 'En düşük riskli taş'}</p>`;
+                    
+                    if (data.risk_level !== undefined) {
+                        html += `<p><strong>Risk Seviyesi:</strong> ${data.risk_level}/10</p>`;
+                    }
+                    
+                    html += '</div>';
+                } else {
+                    html += `<p>${data.suggestion}</p>`;
+                }
+                
+                html += '</div>';
+            }
+            
+            // Simülasyon sonuçları formatı
+            if (data.win_rate !== undefined || data.avg_score !== undefined) {
+                html += '<div class="analysis-section">';
+                html += '<h4>🎲 Simülasyon Sonuçları</h4>';
+                
+                if (data.win_rate !== undefined) {
+                    html += `<p><strong>Kazanma Oranı:</strong> ${(data.win_rate * 100).toFixed(1)}%</p>`;
+                }
+                
+                if (data.avg_score !== undefined) {
+                    html += `<p><strong>Ortalama Puan:</strong> ${data.avg_score.toFixed(1)}</p>`;
+                }
+                
+                if (data.best_moves && data.best_moves.length > 0) {
+                    html += '<div class="best-moves">';
+                    html += '<p><strong>En İyi Hamleler:</strong></p>';
+                    data.best_moves.slice(0, 3).forEach((move, index) => {
+                        html += `<div class="move-item">
+                            <span>${index + 1}. ${move.move}</span>
+                            <span>Ortalama Puan: ${move.avg_score.toFixed(1)}</span>
+                        </div>`;
+                    });
+                    html += '</div>';
+                }
+                
+                html += '</div>';
+            }
             
             // El Analizi
             if (data.best_arrangement) {
@@ -1017,24 +1105,11 @@
                 html += '</div>';
             }
             
-            // Simülasyon Sonuçları
-            if (data.simulation_results) {
-                html += '<div class="analysis-section">';
-                html += '<h4>🎲 Simülasyon Sonuçları</h4>';
-                html += `<p><strong>Kazanma Oranı:</strong> ${(data.simulation_results.win_rate * 100).toFixed(1)}%</p>`;
-                html += `<p><strong>Ortalama Puan:</strong> ${data.simulation_results.average_score.toFixed(1)}</p>`;
-                html += `<p><strong>En İyi Senaryo:</strong> ${data.simulation_results.best_scenario}</p>`;
-                html += '</div>';
-            }
-            
-            // Taş Önerisi
-            if (data.suggested_tile) {
-                html += '<div class="analysis-section">';
-                html += '<h4>🎯 Önerilen Taş</h4>';
-                html += `<div class="suggested-tile">
-                    <span class="tile-display large">${getColorEmoji(data.suggested_tile.color)} ${data.suggested_tile.number}</span>
-                    <p><strong>Neden:</strong> ${data.reason || 'En düşük riskli taş'}</p>
-                </div>`;
+            // Eğer hiçbir format uymuyorsa, JSON olarak göster
+            if (!html) {
+                html = '<div class="analysis-section">';
+                html += '<h4>📊 Ham Sonuç</h4>';
+                html += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
                 html += '</div>';
             }
             
