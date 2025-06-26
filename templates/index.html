@@ -461,6 +461,74 @@
                 font-size: 2rem;
             }
         }
+
+        .dark-mode {
+            background: #181a1b !important;
+            color: #e0e0e0 !important;
+        }
+        .dark-mode .panel {
+            background: #23272a !important;
+            color: #e0e0e0 !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .dark-mode .header {
+            color: #fff !important;
+        }
+        .dark-mode .analysis-section, .dark-mode .per-item, .dark-mode .move-item, .dark-mode .value-item, .dark-mode .risk-item {
+            background: #23272a !important;
+            color: #e0e0e0 !important;
+            border-color: #333 !important;
+        }
+        .dark-mode .tile-display, .dark-mode .tile-display.large {
+            background: #444 !important;
+            color: #fff !important;
+        }
+        .dark-mode .suggested-tile {
+            background: #2d3748 !important;
+            border-color: #4299e1 !important;
+        }
+        .dark-mode .score-info {
+            background: #23272a !important;
+            color: #e0e0e0 !important;
+        }
+        .dark-mode .results {
+            background: #181a1b !important;
+            color: #e0e0e0 !important;
+        }
+        .dark-mode .quick-add-btn, .dark-mode .action-btn {
+            background: #23272a !important;
+            color: #e0e0e0 !important;
+            border: 1px solid #444 !important;
+        }
+        .dark-mode .color-btn.red { background: #a83232 !important; }
+        .dark-mode .color-btn.yellow { background: #bfa52a !important; }
+        .dark-mode .color-btn.blue { background: #2255a8 !important; }
+        .dark-mode .color-btn.black { background: #111 !important; }
+        .dark-mode .okey-indicator { background: #23272a !important; border-color: #444 !important; color: #fff !important; }
+        .dark-mode .tile { background: #444 !important; color: #fff !important; }
+        .dark-mode .remove { background: #333 !important; color: #fff !important; }
+
+        .dark-mode-toggle {
+            position: fixed;
+            top: 24px;
+            right: 32px;
+            z-index: 1000;
+            background: #23272a;
+            color: #fff;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .dark-mode-toggle:hover {
+            background: #444;
+        }
     </style>
 </head>
 <body>
@@ -468,6 +536,11 @@
         <div class="header">
             <h1><i class="fas fa-chess-board"></i> 101 Okey AI Yardımcı Bot</h1>
             <p>Yapay zeka destekli okey strateji asistanı</p>
+        </div>
+
+        <!-- Sağ üstte dark mode butonu -->
+        <div class="dark-mode-toggle" id="darkModeToggle" title="Karanlık Modu Aç/Kapat">
+            <span id="darkModeIcon">🌙</span>
         </div>
 
         <div class="game-board">
@@ -1121,6 +1194,59 @@
             
             discardedTiles.push(...newTiles);
             updateDiscardedTilesDisplay();
+        }
+
+        // Dark mode toggle
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const darkModeIcon = document.getElementById('darkModeIcon');
+        function setDarkMode(enabled) {
+            if (enabled) {
+                document.body.classList.add('dark-mode');
+                darkModeIcon.textContent = '☀️';
+                localStorage.setItem('darkMode', '1');
+            } else {
+                document.body.classList.remove('dark-mode');
+                darkModeIcon.textContent = '🌙';
+                localStorage.setItem('darkMode', '0');
+            }
+        }
+        darkModeToggle.addEventListener('click', () => {
+            setDarkMode(!document.body.classList.contains('dark-mode'));
+        });
+        // Sayfa yüklenince dark mode'u uygula
+        if (localStorage.getItem('darkMode') === '1') {
+            setDarkMode(true);
+        }
+
+        // Simülasyon sonuçlarını yatay kartlar halinde göster
+        function formatAnalysisResults(data) {
+            let html = '';
+            // ... mevcut kod ...
+            // Simülasyon sonuçları formatı
+            if (data.win_rate !== undefined || data.avg_score !== undefined) {
+                html += '<div class="analysis-section">';
+                html += '<h4>🎲 Simülasyon Sonuçları</h4>';
+                if (data.win_rate !== undefined) {
+                    html += `<p><strong>Kazanma Oranı:</strong> ${(data.win_rate * 100).toFixed(1)}%</p>`;
+                }
+                if (data.avg_score !== undefined) {
+                    html += `<p><strong>Ortalama Puan:</strong> ${data.avg_score.toFixed(1)}</p>`;
+                }
+                if (data.best_moves && data.best_moves.length > 0) {
+                    html += '<div class="best-moves-row" style="display: flex; gap: 16px; flex-wrap: wrap; margin-top: 16px;">';
+                    data.best_moves.slice(0, 5).forEach((move, index) => {
+                        html += `<div class="move-item" style="flex: 1 1 180px; min-width: 180px; max-width: 220px; background: var(--move-bg, #fff); border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); padding: 16px; display: flex; flex-direction: column; align-items: center;">
+                            <span class="tile-display large" style="margin-bottom: 8px;">${move.move.replace('_', ' ')}</span>
+                            <span style="font-size: 1.1rem; font-weight: bold; color: #4299e1;">${move.avg_score.toFixed(1)} puan</span>
+                            <span style="font-size: 0.95rem; color: #38a169;">Kazanma: ${(move.win_rate * 100).toFixed(1)}%</span>
+                        </div>`;
+                    });
+                    html += '</div>';
+                }
+                html += '</div>';
+            }
+            // ... mevcut kod ...
+            return html;
         }
     </script>
 </body>
